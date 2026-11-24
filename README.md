@@ -276,11 +276,7 @@ sequenceDiagram
 
 ## 7. 실행 결과와 검증
 
-<p align="center">
-<img src="https://img.shields.io/badge/기능_테스트-10%2F10_통과-16a34a?style=for-the-badge" alt="기능 테스트 10/10 통과">
-<img src="https://img.shields.io/badge/확정한_예측-5%2F5_정답-15803d?style=for-the-badge" alt="확정한 예측 5/5 정답">
-<img src="https://img.shields.io/badge/자동_테스트-Django_18_·_FastAPI_7-262628?style=for-the-badge" alt="자동 테스트">
-</p>
+<p align="center"><img src="docs/images/summary.svg" width="100%" alt="기능 테스트 10/10 통과 · 확정한 예측 5/5 정답 · 자동 테스트 Django 18 · FastAPI 7"></p>
 
 캡처는 시연 PC(Windows + WSL2 Docker)에서 5개 서비스를 띄우고 라이트 모드로 찍었습니다. 이미지를 누르면 원본 크기로 열립니다.
 
