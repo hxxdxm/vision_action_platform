@@ -84,7 +84,7 @@ docker compose exec django python manage.py createsuperuser
 <summary>🧪 테스트 실행</summary>
 
 ```bash
-docker compose exec django python manage.py test           # 웹·권한·Celery 저장·사용자별 번호 17개
+docker compose exec django python manage.py test           # 웹·권한·Celery 저장·사용자별 번호·Admin 조회 전용 18개
 docker compose exec fastapi python -m pytest -q tests      # AI 서버 7개 (테스트 영상이 있으면 실제 추론까지)
 ```
 
@@ -353,6 +353,9 @@ sequenceDiagram
 | 모델 파일 로드 | `joblib.load()` 바로 호출 | SHA256 해시 확인 후 로드 | `joblib.load`는 pickle 실행 → 우리 파일인지 확인 |
 | 입력 품질 | 없음 | 검출 Frame 비율·관절 Confidence로 좋음/보통/나쁨 표시 | 과제 문서: "Confidence와 입력 품질을 함께 표시" |
 | 카메라 주소 | 사용자 입력 | `.env` 허용 목록에서 번호로만 선택 | 임의 URL 호출(SSRF) 방지, 접속정보 비노출 |
+| YOLO 모델 준비 | 영상마다 YOLO를 새로 불러옴 | 서버 시작 시 1번 불러와 빈 화면으로 미리 한 번 추론(warmup), 영상마다 첫 Frame에서 Tracker만 새로 만듦 | 가중치 로드·모델 준비 시간을 매 요청에서 없앰. Track ID는 영상마다 1부터 (inference_lock으로 한 번에 한 영상) |
+| 웹 서버 | — | gunicorn 작업자 2개 × 스레드 4개 | IP Webcam 미리보기가 카메라 응답을 기다리는 동안에도 상태 조회·화면 요청이 막히지 않게 |
+| Admin 권한 | 기본(모두 추가·수정 가능) | 사람별 예측은 조회만, 작업은 제목·메모만 수정, Admin에서 작업 추가 불가 | AI 결과는 Celery Worker만 저장. Admin에서 만든 작업은 Celery에 등록되지 않아 대기 상태로 멈춤 |
 | 작업 번호 | DB id 그대로 | 화면에는 사용자별 번호(`user_no`), 주소·API·Admin에는 전체 공통 id | id만 쓰면 다른 회원 작업 때문에 내 이력이 1, 3, 4…로 띄엄띄엄 보임 |
 | 화면 테마 | 없음 | 흰/어두운 회색 배경 + 그린 포인트, 라이트/다크 전환(브라우저에 기억), Django Admin도 같은 테마 | 발표·캡처 환경에 맞게 고를 수 있고, 서비스와 관리자 화면이 한 제품처럼 보이게 |
 | 결과 화면 | 동작 이름과 확률 | 영상 한 건의 판단 근거(구간별 확률 그래프, 구간 일치율, 관절 인식 품질)를 함께 표시 | 확률이 낮은 모델이라 숫자 하나보다 "왜 이 답인지, 왜 보류했는지"를 보여 주는 게 더 정직함 |

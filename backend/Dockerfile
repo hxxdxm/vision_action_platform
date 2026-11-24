@@ -16,4 +16,5 @@ RUN DJANGO_SECRET_KEY=build python manage.py collectstatic --noinput \
 
 EXPOSE 8000
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]
+# 작업자 2개 × 스레드 4개: IP Webcam 미리보기가 카메라 응답을 기다리는 동안에도 다른 요청(상태 조회·화면)을 처리
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]

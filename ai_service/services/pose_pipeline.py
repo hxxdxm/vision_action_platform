@@ -110,13 +110,26 @@ class PosePipeline:
         self.person_confidence = float(person_confidence)
         self.tracker = tracker
         self.device = device
-        # 서버 시작 시 한 번 불러와 가중치 파일이 정상인지 확인합니다.
-        YOLO(self.weights_path)
+        # 서버 시작 시 한 번만 불러와 모든 요청에서 재사용합니다.
+        # (예전에는 영상마다 YOLO를 새로 만들어 가중치 로드·모델 준비 시간이 매번 들었음)
+        # 동시에 두 영상을 처리하지 않도록 routers/predictions.py의 inference_lock이 한 건씩 넘겨 줍니다.
+        self.model = YOLO(self.weights_path)
+        self._warmup()
 
-    def _new_model(self) -> YOLO:
-        # Tracker 상태(Track ID)는 모델 객체에 남으므로 요청마다 새 객체를 씁니다.
-        # yolo11n-pose는 6MB라 불러오는 시간은 짧습니다.
-        return YOLO(self.weights_path)
+    def _track(self, frame: np.ndarray, persist: bool):
+        return self.model.track(
+            frame,
+            persist=persist,
+            tracker=self.tracker,
+            imgsz=self.image_size,
+            conf=self.person_confidence,
+            device=self.device,
+            verbose=False,
+        )[0]
+
+    def _warmup(self) -> None:
+        """빈 화면으로 한 번 추론해 첫 요청이 느려지지 않게 합니다(모델 준비·Tracker 생성)."""
+        self._track(np.zeros((self.image_size, self.image_size, 3), dtype=np.uint8), persist=False)
 
     def track_video(self, video_path: Path) -> tuple[dict[int, TrackSequence], float, int, int, int]:
         capture = cv2.VideoCapture(str(video_path))
@@ -127,7 +140,6 @@ class PosePipeline:
         width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH) or 0)
         height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT) or 0)
 
-        model = self._new_model()
         tracks: dict[int, TrackSequence] = {}
         frame_index = 0
         try:
@@ -135,15 +147,9 @@ class PosePipeline:
                 ok, frame = capture.read()
                 if not ok:
                     break
-                result = model.track(
-                    frame,
-                    persist=True,
-                    tracker=self.tracker,
-                    imgsz=self.image_size,
-                    conf=self.person_confidence,
-                    device=self.device,
-                    verbose=False,
-                )[0]
+                # 영상의 첫 Frame은 persist=False → Tracker를 새로 만들어 Track ID가 1부터 다시 시작
+                # (ultralytics BYTETracker는 생성될 때 ID를 초기화함). 이후 Frame은 같은 Tracker를 이어 씀.
+                result = self._track(frame, persist=frame_index > 0)
                 self._collect(result, frame_index, tracks)
                 frame_index += 1
         finally:

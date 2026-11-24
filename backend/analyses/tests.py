@@ -53,6 +53,24 @@ class AnalysisApiTests(TestCase):
         defaults.update(kwargs)
         return AnalysisJob.objects.create(user=user, **defaults)
 
+    # Admin: AI 결과(사람별 예측)는 조회만, 작업은 상태·결과를 고칠 수 없음
+    def test_admin_ai_results_are_read_only(self):
+        job = self.create_job(self.a)
+        pred = PersonPrediction.objects.create(job=job, track_id=1, action_label="wave", confidence=0.3)
+        self.client.force_login(self.admin)
+        self.assertEqual(self.client.get("/admin/analyses/personprediction/add/").status_code, 403)
+        self.assertEqual(self.client.get("/admin/analyses/analysisjob/add/").status_code, 403)
+        r = self.client.get(f"/admin/analyses/personprediction/{pred.pk}/change/")
+        self.assertEqual(r.status_code, 200)
+        self.assertNotContains(r, 'name="action_label"')  # 입력칸 없이 보기만
+        r = self.client.get(f"/admin/analyses/analysisjob/{job.pk}/change/")
+        self.assertEqual(r.status_code, 200)
+        self.assertNotContains(r, 'name="status"')
+        self.assertContains(r, 'name="memo"')
+        self.client.post(f"/admin/analyses/personprediction/{pred.pk}/change/", {"action_label": "sit_stand"})
+        pred.refresh_from_db()
+        self.assertEqual(pred.action_label, "wave")
+
     # 화면 번호: 사용자마다 1, 2, 3… (전체 공통 id와 별개)
     def test_user_no_counts_per_user(self):
         a1 = self.create_job(self.a)
