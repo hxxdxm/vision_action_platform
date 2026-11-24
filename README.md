@@ -1,6 +1,6 @@
 # Vision Action Platform
 
-<p align="center"><img src="docs/images/banner.jpg" width="100%" alt="Vision Action Platform"></p>
+<p align="center"><img src="docs/images/banner.svg" width="100%" alt="Vision Action Platform"></p>
 
 ## 1. 프로젝트 소개
 
@@ -9,9 +9,9 @@ Vision Action Platform은 영상 속 사람의 동작을 AI로 인식하는 웹 
 <p align="center"><img src="docs/images/overview.svg" width="100%" alt="입력 → 결과 → 관리"></p>
 
 <p align="center">
-<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white" alt="Django"> <img src="https://img.shields.io/badge/DRF-A30000?style=for-the-badge&logo=django&logoColor=white" alt="DRF"> <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"><br>
-<img src="https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white" alt="Celery"> <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"> <img src="https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose"><br>
-<img src="https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="scikit-learn"> <img src="https://img.shields.io/badge/YOLO11_Pose-111F68?style=for-the-badge&logo=ultralytics&logoColor=white" alt="YOLO11 Pose"> <img src="https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Chart.js">
+<img src="https://img.shields.io/badge/Python-262628?style=for-the-badge&logo=python&logoColor=22c55e" alt="Python"> <img src="https://img.shields.io/badge/Django-262628?style=for-the-badge&logo=django&logoColor=22c55e" alt="Django"> <img src="https://img.shields.io/badge/DRF-262628?style=for-the-badge&logo=django&logoColor=22c55e" alt="DRF"> <img src="https://img.shields.io/badge/FastAPI-262628?style=for-the-badge&logo=fastapi&logoColor=22c55e" alt="FastAPI"><br>
+<img src="https://img.shields.io/badge/Celery-262628?style=for-the-badge&logo=celery&logoColor=22c55e" alt="Celery"> <img src="https://img.shields.io/badge/Redis-262628?style=for-the-badge&logo=redis&logoColor=22c55e" alt="Redis"> <img src="https://img.shields.io/badge/PostgreSQL-262628?style=for-the-badge&logo=postgresql&logoColor=22c55e" alt="PostgreSQL"> <img src="https://img.shields.io/badge/Docker_Compose-262628?style=for-the-badge&logo=docker&logoColor=22c55e" alt="Docker Compose"><br>
+<img src="https://img.shields.io/badge/scikit--learn-262628?style=for-the-badge&logo=scikitlearn&logoColor=22c55e" alt="scikit-learn"> <img src="https://img.shields.io/badge/YOLO11_Pose-262628?style=for-the-badge&logo=ultralytics&logoColor=22c55e" alt="YOLO11 Pose"> <img src="https://img.shields.io/badge/Chart.js-262628?style=for-the-badge&logo=chartdotjs&logoColor=22c55e" alt="Chart.js">
 </p>
 
 > 확률이 낮거나 1·2등 차이가 작으면 답을 확정하지 않고 **판단 보류**로 표시합니다. 결과는 참고용이며 위험 행동 판정이 아닙니다.
@@ -20,7 +20,7 @@ Vision Action Platform은 영상 속 사람의 동작을 AI로 인식하는 웹 
 
 <p align="center"><img src="docs/images/run_steps.svg" width="100%" alt="저장소 받기 → 모델 확인 → 실행 → 관리자 계정 → 접속"></p>
 
-**준비물** &nbsp; <img src="https://img.shields.io/badge/Docker_Desktop-WSL2-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker Desktop"> <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white" alt="Git">
+**준비물** &nbsp; <img src="https://img.shields.io/badge/Docker_Desktop-WSL2-262628?style=flat-square&logo=docker&logoColor=22c55e" alt="Docker Desktop"> <img src="https://img.shields.io/badge/Git-262628?style=flat-square&logo=git&logoColor=22c55e" alt="Git">
 
 #### 1️⃣ 저장소 받기 · `.env` 만들기
 

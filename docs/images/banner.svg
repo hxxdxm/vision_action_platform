@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" font-family="'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1c1c1e"/><stop offset="1" stop-color="#232326"/>
+    </linearGradient>
+    <linearGradient id="btn" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#166534"/><stop offset="1" stop-color="#16a34a"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.035"/>
+    </pattern>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#22c55e" stop-opacity="0.18"/><stop offset="1" stop-color="#22c55e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="360" rx="20" fill="url(#bg)"/>
+  <rect width="1200" height="360" rx="20" fill="url(#grid)"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="358.5" rx="19.5" fill="none" stroke="#424246" stroke-width="1.5"/>
+
+  <!-- 왼쪽: 제목 -->
+  <g transform="translate(64,0)">
+    <circle cx="14" cy="104" r="12" fill="none" stroke="#22c55e" stroke-width="4"/>
+    <circle cx="14" cy="104" r="6" fill="#22c55e"/>
+    <text x="40" y="117" font-size="40" font-weight="800" fill="#f5f5f5">Vision Action</text>
+    <text x="0" y="168" font-size="22" fill="#d4d4d4">영상 속 사람의 동작을 AI로 인식하는 웹 서비스</text>
+    <text x="0" y="202" font-size="16" fill="#a3a3a3">영상 업로드 · IP Webcam → 사람별 동작 6종 · 판단 근거 · 관리자 대시보드</text>
+    <!-- 기술 칩 -->
+    <g font-size="14" font-weight="700">
+      <rect x="0" y="236" width="128" height="34" rx="17" fill="#22c55e" fill-opacity="0.12" stroke="#22c55e" stroke-opacity="0.55"/>
+      <text x="64" y="258" text-anchor="middle" fill="#86efac">YOLO11 Pose</text>
+      <rect x="140" y="236" width="138" height="34" rx="17" fill="#22c55e" fill-opacity="0.12" stroke="#22c55e" stroke-opacity="0.55"/>
+      <text x="209" y="258" text-anchor="middle" fill="#86efac">Random Forest</text>
+      <rect x="290" y="236" width="140" height="34" rx="17" fill="#ffffff" fill-opacity="0.04" stroke="#424246"/>
+      <text x="360" y="258" text-anchor="middle" fill="#d4d4d4">Django · DRF</text>
+      <rect x="442" y="236" width="196" height="34" rx="17" fill="#ffffff" fill-opacity="0.04" stroke="#424246"/>
+      <text x="540" y="258" text-anchor="middle" fill="#d4d4d4">FastAPI · Celery · Redis</text>
+    </g>
+    <rect x="0" y="292" width="186" height="40" rx="10" fill="url(#btn)"/>
+    <text x="93" y="318" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">AI 분석 시작</text>
+  </g>
+
+  <!-- 오른쪽: 스켈레톤 + 결과 카드 -->
+  <g transform="translate(790,40)">
+    <rect x="0" y="0" width="346" height="280" rx="16" fill="#262628" stroke="#424246" stroke-width="1.5"/>
+    <circle cx="112" cy="140" r="120" fill="url(#halo)"/>
+    <!-- 손 흔드는 사람 (COCO 17점 형태) -->
+    <g stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none">
+      <path d="M96 92 L128 92"/>            <!-- 어깨 -->
+      <path d="M96 92 L84 132 L80 170"/>    <!-- 왼팔 -->
+      <path d="M128 92 L156 70 L170 34"/>   <!-- 오른팔(흔들기) -->
+      <path d="M96 92 L100 160 M128 92 L124 160 M100 160 L124 160"/> <!-- 몸통 -->
+      <path d="M100 160 L94 206 L90 250"/>  <!-- 왼다리 -->
+      <path d="M124 160 L132 206 L138 250"/><!-- 오른다리 -->
+    </g>
+    <g stroke="#22c55e" stroke-width="2" stroke-dasharray="2 5" fill="none" opacity="0.7">
+      <path d="M176 22 q10 12 0 24"/><path d="M186 14 q16 20 0 40"/>
+    </g>
+    <circle cx="112" cy="62" r="16" fill="none" stroke="#86efac" stroke-width="3"/>
+    <g fill="#86efac" stroke="#262628" stroke-width="2">
+      <circle cx="96" cy="92" r="5"/><circle cx="128" cy="92" r="5"/><circle cx="84" cy="132" r="5"/><circle cx="80" cy="170" r="5"/>
+      <circle cx="156" cy="70" r="5"/><circle cx="170" cy="34" r="5"/><circle cx="100" cy="160" r="5"/><circle cx="124" cy="160" r="5"/>
+      <circle cx="94" cy="206" r="5"/><circle cx="90" cy="250" r="5"/><circle cx="132" cy="206" r="5"/><circle cx="138" cy="250" r="5"/>
+    </g>
+    <!-- 결과 미니 카드 -->
+    <g transform="translate(200,64)">
+      <text x="0" y="0" font-size="12" fill="#a3a3a3">사람 #1</text>
+      <text x="0" y="28" font-size="22" font-weight="800" fill="#f5f5f5">손 흔들기</text>
+      <rect x="0" y="40" width="40" height="20" rx="10" fill="#22c55e" fill-opacity="0.16"/>
+      <text x="20" y="54" text-anchor="middle" font-size="11" font-weight="700" fill="#86efac">확정</text>
+      <g font-size="11" fill="#d4d4d4">
+        <text x="0" y="92">손 흔들기</text>
+        <rect x="0" y="98" width="120" height="7" rx="3.5" fill="#353538"/><rect x="0" y="98" width="88" height="7" rx="3.5" fill="#22c55e"/>
+        <text x="0" y="124">마시고 제자리로</text>
+        <rect x="0" y="130" width="120" height="7" rx="3.5" fill="#353538"/><rect x="0" y="130" width="50" height="7" rx="3.5" fill="#86efac"/>
+        <text x="0" y="156">다리 들었다 내리기</text>
+        <rect x="0" y="162" width="120" height="7" rx="3.5" fill="#353538"/><rect x="0" y="162" width="44" height="7" rx="3.5" fill="#86efac"/>
+      </g>
+      <text x="0" y="196" font-size="12" fill="#a3a3a3">Confidence <tspan fill="#f5f5f5" font-weight="700">33%</tspan></text>
+    </g>
+  </g>
+</svg>
