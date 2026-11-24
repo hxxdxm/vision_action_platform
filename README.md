@@ -4,7 +4,7 @@
 
 ## 1. 프로젝트 소개
 
-Vision Action Platform은 영상 속 사람의 동작을 AI로 인식하는 웹 서비스입니다. 동작 인식 모델을 스크립트로 돌릴 필요 없이, 브라우저에서 분석을 요청하고 결과를 기록으로 남길 수 있습니다.
+Vision Action Platform은 영상 속 사람의 동작을 AI로 인식하는 웹 서비스입니다. 동작 인식 모델을 스크립트로 돌릴 필요 없이, 브라우저에서 분석을 요청하고 결과를 기록으로 남길 수 있습니다. 화면은 흰/어두운 회색 배경에 그린 포인트를 쓰고, 오른쪽 위 버튼으로 라이트·다크 모드를 바꿀 수 있습니다(Django Admin도 같은 테마).
 
 <p align="center"><img src="docs/images/overview.svg" width="100%" alt="입력 → 결과 → 관리"></p>
 
@@ -187,7 +187,7 @@ erDiagram
 - 영상 파일 자체는 DB가 아니라 Media 볼륨에 두고 경로만 저장합니다.
 - `id`는 전체 사용자 공통 번호(주소·API·Admin에서 사용), `user_no`는 그 사용자의 몇 번째 작업인지(화면 표시용)입니다. 새 작업을 만들 때 그 사용자의 마지막 번호 + 1로 정하고, 이미 있던 작업은 마이그레이션 `0003`이 만든 순서대로 채웠습니다.
 - IP Webcam 주소는 DB·화면에 남기지 않고 허용 목록 번호(`camera_index`)만 저장합니다.
-- 작업을 삭제하면 사람별 예측은 `CASCADE`로 함께 지우고 영상 파일도 지웁니다. 처리 중(STARTED)인 작업은 삭제할 수 없습니다.
+- 작업을 삭제하면 사람별 예측은 `CASCADE`로 함께 지워집니다. 서비스 화면(삭제·전체 지우기)에서 지우면 업로드 영상 파일도 함께 지웁니다. 처리 중(STARTED)인 작업은 삭제할 수 없습니다.
 
 ## 5. AI 추론 버튼 구현 흐름
 
@@ -309,8 +309,8 @@ sequenceDiagram
 
 <p align="center"><a href="docs/images/admin_jobs.png"><img src="docs/images/admin_jobs.png" width="820" alt="Admin 작업 목록"></a></p>
 
-> **입력** 관리자 계정으로 `/admin/` → 분석 작업<br>
-> **결과** 전체 사용자의 작업 목록: 사용자·입력 방식·상태·사람별 결과·AI 처리 시간, 상태·입력 방식·동작·날짜 필터. 일반 회원은 접근 불가 ([캡처](docs/images/admin_denied.png))
+> **입력** 관리자 계정으로 `/admin/` → Analysis jobs<br>
+> **결과** 전체 사용자의 작업 목록: ID·사용자·사용자별 번호·입력 방식·상태·사람별 결과·AI 처리 시간, 상태·입력 방식·동작·날짜 필터. 일반 회원은 접근 불가 ([캡처](docs/images/admin_denied.png))
 
 ### ④ 관리자 대시보드
 
@@ -335,7 +335,7 @@ sequenceDiagram
 | **T01 모델 불러오기**<br><br>FastAPI가 시작할 때 6일차 RandomForest 모델과 설정 JSON을 불러오고 상태를 알려 줌<br><br>**확인 방법**<br>`GET /health`<br>`test_health_model_ready`<br><br>**기대 결과**<br>6개 Class, 1,140개 Feature 조건 일치<br><br>**결과** Pass | <a href="docs/images/t01_health.png"><img src="docs/images/tests/t01.png" width="560" alt="T01"></a> |
 | **T02 영상 업로드**<br><br>MP4를 올리면 작업이 등록되고 사람별 동작 결과가 화면에 표시됨<br><br>**확인 방법**<br>`S03_A002_T01.mp4` 업로드<br><br>**기대 결과**<br>작업 등록 → 결과 또는 명확한 실패 사유<br><br>**결과** Pass | <a href="docs/images/analysis.png"><img src="docs/images/tests/t02.png" width="560" alt="T02"></a> |
 | **T03 IP Webcam**<br><br>휴대폰 IP Webcam 영상을 미리 보며 몇 초 녹화해 분석 요청<br><br>**확인 방법**<br>휴대폰 IP Webcam으로 8초 녹화<br><br>**기대 결과**<br>짧은 영상 수집·분석 요청 성공<br><br>**결과**  |  |
-| **T04 사람별 결과**<br><br>한 영상에서 여러 사람을 Track ID로 나눠 사람마다 결과를 저장<br><br>**확인 방법**<br>`S02_A001` 영상(뒤에 사람 1명 더)<br><br>**기대 결과**<br>한 작업에 Track ID별 결과 분리 (#13: 2건)<br><br>**결과** Pass | <a href="docs/images/admin_predictions.png"><img src="docs/images/tests/t04.png" width="560" alt="T04"></a> |
+| **T04 사람별 결과**<br><br>한 영상에서 여러 사람을 Track ID로 나눠 사람마다 결과를 저장<br><br>**확인 방법**<br>여러 사람이 나오는 영상 업로드 → Admin Person predictions<br><br>**기대 결과**<br>한 작업에 Track ID별 결과 분리 (작업 #6: Track 1·2·5 세 사람, #7~#9: 각 2명)<br><br>**결과** Pass | <a href="docs/images/admin_predictions.png"><img src="docs/images/tests/t04.png" width="560" alt="T04"></a> |
 | **T05 비동기 처리**<br><br>분석은 Celery Worker가 맡고 웹 서버는 기다리지 않고 바로 응답<br><br>**확인 방법**<br>`test_create_returns_job_id_immediately`<br>요청 직후 화면<br><br>**기대 결과**<br>202와 작업 ID 즉시 반환, 상태 "처리 중"<br><br>**결과** Pass | <a href="docs/images/t05_async.png"><img src="docs/images/tests/t05.png" width="560" alt="T05"></a> |
 | **T06 영구 저장**<br><br>작업과 사람별 예측이 PostgreSQL에 남아 새로고침해도 이력에 보임<br><br>**확인 방법**<br>`test_task_saves_predictions`<br>분석 후 새로고침<br><br>**기대 결과**<br>같은 작업·예측 결과가 DB에 남아 있음<br><br>**결과** Pass | <a href="docs/images/history.png"><img src="docs/images/tests/t06.png" width="560" alt="T06"></a> |
 | **T07 CRUD 권한**<br><br>일반 회원은 본인 작업만 조회·수정·삭제할 수 있음<br><br>**확인 방법**<br>`test_user_cannot_touch_others_job`<br>남의 작업 주소 직접 열기<br><br>**기대 결과**<br>다른 회원 작업은 404로 막힘<br><br>**결과** Pass | <a href="docs/images/t07_forbidden.png"><img src="docs/images/tests/t07.png" width="560" alt="T07"></a> |
@@ -422,7 +422,8 @@ vision_action_platform/
 │   ├── config/              # settings, urls, celery
 │   ├── accounts/            # 회원가입·로그인·로그아웃
 │   ├── analyses/            # models, serializers, views(API), page_views(화면·대시보드), tasks, services, camera_capture, admin, tests
-│   ├── templates/  static/
+│   ├── templates/           # base(공통 메뉴·테마 버튼), accounts, analyses, admin/base_site(Admin 테마)
+│   ├── static/              # css(app·admin), js(analyses·dashboard·theme), vendor/chart.js
 │   ├── Dockerfile  entrypoint.sh  requirements.txt
 ├── ai_service/              # FastAPI 추론 서버
 │   ├── main.py  settings.py  schemas.py
@@ -433,5 +434,6 @@ vision_action_platform/
 │   ├── scripts/             # evaluate_videos(정확도 평가), experiment_inference(추론 방식 실험)
 │   ├── tests/
 │   ├── Dockerfile  requirements.txt
-├── compose.yaml  .env.example  docs/
+├── docs/                    # images(README 캡처·그림), make_thumbs.py(기능 테스트 썸네일 생성), 평가 결과
+├── compose.yaml  .env.example
 ```
