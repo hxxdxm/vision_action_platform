@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}AI 분석{% endblock %}
+{% block content %}
+<!-- 지금 보고 있는 영상 한 건의 지표 (이력에서 다른 분석을 누르면 바뀜) -->
+<div class="focus-head" id="focus-head"><span class="dot"></span><span id="focus-text">분석을 시작하거나 아래 이력에서 분석을 고르면 그 영상의 지표가 표시됩니다.</span></div>
+<div class="kpis" id="kpis">
+  <div class="kpi"><div><div class="lbl">1등 확률 (Confidence)</div><div class="val" data-k="conf">-</div><div class="sub" data-k="conf-sub">무작위 {{ rules.chance_pct|floatformat:"-1" }}% 대비</div></div><div class="ring" data-ring="conf"></div></div>
+  <div class="kpi"><div><div class="lbl">2등과 차이</div><div class="val" data-k="margin">-</div><div class="sub" data-k="margin-sub">확정 기준 {{ rules.margin_pct|floatformat:"-1" }}%p 이상</div></div><div class="ring" data-ring="margin"></div></div>
+  <div class="kpi"><div><div class="lbl">구간 일치율</div><div class="val" data-k="agree">-</div><div class="sub" data-k="agree-sub">2초 구간들이 같은 답을 낸 비율</div></div><div class="ring" data-ring="agree"></div></div>
+  <div class="kpi"><div><div class="lbl">관절 인식 품질 (평균 Confidence)</div><div class="val" data-k="pose">-</div><div class="sub" data-k="pose-sub">평균 관절 Confidence</div></div><div class="ring" data-ring="pose"></div></div>
+</div>
+
+<div class="grid">
+  <section class="card">
+    <div class="cardhead"><div>
+      <h1>AI 동작 분석</h1>
+      <div class="muted">6개 동작(허리 굽히기, 다리 들기, 걷다 돌기, 마시기, 앉았다 일어서기, 손 흔들기)을 인식합니다.</div>
+    </div></div>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-input="upload" role="tab">영상 업로드</button>
+      <button type="button" class="tab" data-input="ip_webcam" role="tab">IP Webcam</button>
+    </div>
+
+    <form id="analysis-form">
+      {% csrf_token %}
+      <input type="hidden" name="input_type" value="upload">
+
+      <div class="pane" data-pane="upload">
+        <label class="drop" id="drop">
+          <input type="file" name="video" accept="video/*">
+          <span id="drop-text">MP4 영상을 끌어다 놓거나 눌러서 선택 (최대 {{ max_upload_mb }}MB)</span>
+        </label>
+        <video id="preview" controls muted hidden></video>
+      </div>
+
+      <div class="pane" data-pane="ip_webcam" hidden>
+        {% if cameras %}
+          <label>카메라
+            <select name="camera_index">
+              {% for c in cameras %}<option value="{{ c.index }}">{{ c.name }}</option>{% endfor %}
+            </select>
+          </label>
+          <div class="cam" id="cam" data-seconds="{{ capture_seconds|floatformat:0 }}">
+            <img id="cam-live" alt="IP Webcam 미리보기">
+            <video id="cam-recorded" controls muted hidden></video>
+            <div class="cam-msg" id="cam-msg">카메라에 연결하는 중…</div>
+            <div class="cam-tag" id="cam-tag">미리보기</div>
+          </div>
+          <p class="muted">분석 시작을 누르면 서버가 카메라에서 <b>{{ capture_seconds|floatformat:0 }}초</b> 동안 영상을 받아 분석합니다. 버튼을 누른 뒤 카메라 앞에서 동작해 주세요.</p>
+        {% else %}
+          <p class="error">허용된 IP Webcam이 없습니다. 관리자가 .env의 IP_WEBCAM_ALLOWED_URLS를 설정해야 합니다.</p>
+        {% endif %}
+      </div>
+
+      <div class="row">
+        <label>제목 (선택) <input type="text" name="title" maxlength="100" placeholder="예: 앉았다 일어나기 테스트"></label>
+        <label>실제로 한 동작 (선택)
+          <select name="expected_action">
+            <option value="">선택 안 함</option>
+            {% for key, label in actions %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <button type="submit" class="primary wide" id="start-btn">AI 분석 시작</button>
+      <div id="form-error" class="error" hidden></div>
+    </form>
+  </section>
+
+  <section class="card" id="result-card">
+    <div class="cardhead"><h2>분석 결과</h2><span class="muted" id="result-meta"></span></div>
+    <ol class="steps" id="steps">
+      <li data-step="PENDING">대기</li>
+      <li data-step="STARTED">처리 중</li>
+      <li data-step="DONE">완료</li>
+    </ol>
+    <div id="result-empty" class="muted">분석을 시작하면 여기에 사람별 결과가 표시됩니다.<br>
+      Confidence는 Random Forest 나무들 중 그 동작에 투표한 비율이며, 6개 동작을 무작위로 고르면 {{ rules.chance_pct|floatformat:"-1" }}%입니다.</div>
+    <div id="result-body" hidden>
+      <div id="result-error" class="error" hidden></div>
+      <div class="metrics" id="job-metrics" hidden>
+        <div><span>분석 사람</span><b data-m="people">-</b></div>
+        <div><span>AI 처리</span><b data-m="ai">-</b></div>
+        <div><span>요청 → 완료</span><b data-m="total">-</b></div>
+        <div><span>영상 길이</span><b data-m="video">-</b></div>
+      </div>
+      <div id="people"></div>
+      <a id="detail-link" href="#">상세 보기 →</a>
+    </div>
+  </section>
+</div>
+
+<div class="grid-wide">
+  <section class="card">
+    <div class="cardhead"><h2>영상 구간별 동작 확률</h2><span class="muted" id="timeline-sub">2초 구간을 0.5초씩 옮기며 예측</span></div>
+    <div class="chartbox"><canvas id="timelineChart"></canvas></div>
+  </section>
+  <section class="card">
+    <div class="cardhead"><h2>판단 근거: 전체 구간 vs 구간 평균</h2><span class="muted">최종 = 두 값의 평균</span></div>
+    <div class="chartbox"><canvas id="compareChart"></canvas></div>
+  </section>
+</div>
+
+<section class="card">
+  <div class="section-head">
+    <button type="button" class="fold" id="fold-history" aria-expanded="true" aria-controls="history-body">
+      <span class="chev">▾</span> <h2>최근 분석 이력</h2> <span class="count" id="history-count">{{ recent|length }}</span>
+    </button>
+    <span class="head-actions"><span class="muted hint">행을 누르면 위에 그 영상의 결과가 보여요</span>
+      <button type="button" class="link danger" id="clear-history">전체 지우기</button></span>
+  </div>
+  <div id="history-body">
+  <table class="table" id="history">
+    <thead><tr><th>#</th><th>시간</th><th>입력</th><th>상태</th><th>결과</th><th>Confidence</th><th>실제 동작</th><th></th></tr></thead>
+    <tbody>
+      {% for job in recent %}
+      {% with top=job.top_prediction state=job.match_state %}
+      <tr data-id="{{ job.id }}" data-status="{{ job.status }}" class="pick">
+        <td>{{ job.id }}</td>
+        <td>{{ job.created_at|date:"m/d H:i" }}</td>
+        <td>{{ job.get_input_type_display }}</td>
+        <td><span class="badge s-{{ job.status }}">{{ job.get_status_display }}</span></td>
+        <td>{% for p in job.predictions.all %}<span class="chip{% if not p.is_decided %} hold{% endif %}">#{{ p.track_id }} {{ p.action_display }}</span>{% empty %}<span class="muted">{{ job.error_message|default:job.result_message|default:"-"|truncatechars:40 }}</span>{% endfor %}</td>
+        <td>{% if top %}<span class="mini"><i style="width:{% widthratio top.confidence 1 100 %}%"></i></span>{{ top.confidence|floatformat:2 }}{% else %}<span class="muted">-</span>{% endif %}</td>
+        <td>{% if state == "match" %}<span class="m-match">✓ 일치</span>{% elif state == "mismatch" %}<span class="m-mismatch">✗ {{ job.get_expected_action_display }}</span>{% elif state == "hold" %}<span class="m-hold">보류</span>{% else %}<span class="muted">{{ job.get_expected_action_display|default:"-" }}</span>{% endif %}</td>
+        <td class="actions"><a href="{% url 'analyses:detail' job.id %}">상세</a> <button type="button" class="link danger del-job">삭제</button></td>
+      </tr>
+      {% endwith %}
+      {% empty %}
+      <tr class="empty"><td colspan="8" class="muted">아직 분석 기록이 없습니다.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{{ rules|json_script:"rules-data" }}
+{{ actions|json_script:"actions-data" }}
+{% endblock %}
+{% block scripts %}
+<!-- Chart.js 4.4.1 (MIT): 시연장 인터넷이 없어도 차트가 보이도록 저장소에 포함 -->
+<script src="{% static 'vendor/chart.umd.js' %}"></script>
+<script src="{% static 'js/analyses.js' %}"></script>
+{% endblock %}
