@@ -84,7 +84,7 @@ docker compose exec django python manage.py createsuperuser
 <summary>🧪 테스트 실행</summary>
 
 ```bash
-docker compose exec django python manage.py test           # 웹·권한·Celery 저장 16개
+docker compose exec django python manage.py test           # 웹·권한·Celery 저장·사용자별 번호 17개
 docker compose exec fastapi python -m pytest -q tests      # AI 서버 7개 (테스트 영상이 있으면 실제 추론까지)
 ```
 
@@ -145,6 +145,7 @@ erDiagram
     AnalysisJob {
         bigint id PK
         int user_id FK
+        int user_no "사용자별 번호 1, 2, 3…"
         string title
         text memo
         string input_type "upload | ip_webcam"
@@ -180,10 +181,11 @@ erDiagram
 | 테이블 | 저장하는 것 |
 |---|---|
 | `auth_user` | 회원(아이디, 비밀번호 해시, 관리자 여부) |
-| `AnalysisJob` | 분석 요청 1건: 누가, 어떤 입력으로, 지금 상태, 오류 사유, 처리 시간 |
+| `AnalysisJob` | 분석 요청 1건: 누가, 어떤 입력으로, 지금 상태, 오류 사유, 처리 시간. 화면에는 사용자별 번호(`user_no`)로 표시 |
 | `PersonPrediction` | 한 작업 안의 사람 1명의 예측. 두 사람이 나오면 작업 1건에 2행. `(job, track_id)` 유일. 화면 그래프에 쓰는 판단 근거(`details`)도 함께 저장 |
 
 - 영상 파일 자체는 DB가 아니라 Media 볼륨에 두고 경로만 저장합니다.
+- `id`는 전체 사용자 공통 번호(주소·API·Admin에서 사용), `user_no`는 그 사용자의 몇 번째 작업인지(화면 표시용)입니다. 새 작업을 만들 때 그 사용자의 마지막 번호 + 1로 정하고, 이미 있던 작업은 마이그레이션 `0003`이 만든 순서대로 채웠습니다.
 - IP Webcam 주소는 DB·화면에 남기지 않고 허용 목록 번호(`camera_index`)만 저장합니다.
 - 작업을 삭제하면 사람별 예측은 `CASCADE`로 함께 지우고 영상 파일도 지웁니다. 처리 중(STARTED)인 작업은 삭제할 수 없습니다.
 
@@ -351,6 +353,8 @@ sequenceDiagram
 | 모델 파일 로드 | `joblib.load()` 바로 호출 | SHA256 해시 확인 후 로드 | `joblib.load`는 pickle 실행 → 우리 파일인지 확인 |
 | 입력 품질 | 없음 | 검출 Frame 비율·관절 Confidence로 좋음/보통/나쁨 표시 | 과제 문서: "Confidence와 입력 품질을 함께 표시" |
 | 카메라 주소 | 사용자 입력 | `.env` 허용 목록에서 번호로만 선택 | 임의 URL 호출(SSRF) 방지, 접속정보 비노출 |
+| 작업 번호 | DB id 그대로 | 화면에는 사용자별 번호(`user_no`), 주소·API·Admin에는 전체 공통 id | id만 쓰면 다른 회원 작업 때문에 내 이력이 1, 3, 4…로 띄엄띄엄 보임 |
+| 화면 테마 | 없음 | 흰/어두운 회색 배경 + 그린 포인트, 라이트/다크 전환(브라우저에 기억), Django Admin도 같은 테마 | 발표·캡처 환경에 맞게 고를 수 있고, 서비스와 관리자 화면이 한 제품처럼 보이게 |
 | 결과 화면 | 동작 이름과 확률 | 영상 한 건의 판단 근거(구간별 확률 그래프, 구간 일치율, 관절 인식 품질)를 함께 표시 | 확률이 낮은 모델이라 숫자 하나보다 "왜 이 답인지, 왜 보류했는지"를 보여 주는 게 더 정직함 |
 
 참고 논문
@@ -390,6 +394,25 @@ sequenceDiagram
 - 확인한 곳: `docker compose logs fastapi` → YOLO warmup 중 `import torchvision`에서 실패
 - 원인: torch는 CPU 전용 저장소에서, torchvision은 ultralytics 의존성으로 PyPI에서 따로 설치돼 서로 다른 torch 판으로 빌드된 짝이 됨
 - 바꾼 것: Dockerfile에서 torch와 torchvision을 같은 CPU 저장소에서 함께 설치
+
+**8) `docker compose up` 후 django만 안 뜸 (`port is already allocated`)**
+- 보인 문제: `docker compose ps`에 django가 없고, `createsuperuser`가 `service "django" is not running`
+- 확인한 곳: `docker ps --filter publish=8000` → 예전 실습 컨테이너 `fastapi_resnet18-web-1`이 8000번 사용 중
+- 바꾼 것: 예전 컨테이너를 멈추고(`docker stop`) 자동 재시작을 끔(`docker update --restart=no`)
+- 확인: `docker compose up -d` 후 5개 서비스 모두 Up
+
+**9) django가 계속 재시작 (`failed to resolve host 'postgres'`)**
+- 보인 문제: `createsuperuser` 실행 시 `Container … is restarting`
+- 확인한 곳: `docker compose logs django` → DB 주소 `postgres`를 찾지 못함
+- 원인: 포트 충돌로 django만 따로 만들어지다 실패한 컨테이너가 남아 지금 Compose 네트워크와 연결되지 않음
+- 바꾼 것: `docker compose down`(데이터 볼륨은 유지) 후 `docker compose up -d`로 컨테이너·네트워크를 새로 만듦
+- 확인: 5개 서비스 Up, 기존 작업 기록 그대로 남음
+
+**10) 내 분석 이력 번호가 1, 3, 4…로 띄엄띄엄 보임**
+- 보인 문제: 다른 계정으로 분석한 뒤 내 계정 이력에서 2번이 빠져 보임
+- 원인: 화면에 DB의 전체 공통 id를 그대로 보여 줌 (목록은 본인 것만 나오므로 권한 문제는 아님)
+- 바꾼 것: `AnalysisJob.user_no`(사용자별 번호) 추가, 화면은 `user_no`, 주소·API·Admin은 id 유지
+- 확인: `test_user_no_counts_per_user` — A 1·2, B 1로 따로 매겨짐
 
 ## 폴더 구조
 
