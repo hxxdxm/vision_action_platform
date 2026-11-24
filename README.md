@@ -287,14 +287,14 @@ sequenceDiagram
 - 오답은 모두 1·2등 차이가 작아 "판단 보류"로 표시됐습니다. 확정한 결과는 모두 맞았습니다.
 - 좌우 반전 예측 평균, 구간 길이 섞기, fps 영향도 같은 방법(S02로만 비교)으로 시험했지만 분명히 좋아지지 않아 반영하지 않았습니다: [`docs/inference_experiments.md`](docs/inference_experiments.md)
 
-> 과제 12장이 요구하는 캡처 4장(정상 분석·오류·관리자 화면·대시보드)에, 이 서비스의 특징인 "판단 보류" 1장을 더했습니다. 캡처는 시연 PC(Windows + WSL2 Docker)에서 5개 서비스를 띄우고 찍었고, "판단 보류"만 같은 코드로 개발 환경에서 찍었습니다. 이미지를 누르면 원본 크기로 열립니다.
+> 과제 12장이 요구하는 캡처 4장(정상 분석·오류·관리자 화면·대시보드)에, 이 서비스의 특징인 "판단 보류" 1장을 더했습니다. 캡처는 시연 PC(Windows + WSL2 Docker)에서 5개 서비스를 띄우고 라이트 모드로 찍었습니다. 이미지를 누르면 원본 크기로 열립니다.
 
 ### ① 정상 분석
 
 <p align="center"><a href="docs/images/analysis.png"><img src="docs/images/analysis.png" width="820" alt="정상 분석"></a></p>
 
-> **입력** 영상 업로드 탭에 `S03_A006_T01.mp4`(손 흔들기)<br>
-> **결과** 사람 #1 **손 흔들기**, Confidence 33.0%(무작위 16.7%의 2.0배), 2등과 차이 14.1%p, 2초 구간 6개 모두 같은 답, 관절 인식 0.97, AI 처리 4.0초
+> **입력** 영상 업로드 탭에 `S03_A002_T01.mp4`(다리 들었다 내리기)<br>
+> **결과** 사람 #1 **다리 들었다 내리기** (확정), Confidence 35.0%(무작위 16.7%의 2.1배), 2등과 차이 17.9%p, 2초 구간 3개 모두 같은 답, 관절 인식 0.97, AI 처리 2.2초
 
 ### ② 오류·실패
 
@@ -331,7 +331,7 @@ sequenceDiagram
 | 테스트 | 스샷 |
 |---|:---:|
 | **T01 모델 불러오기**<br><br>FastAPI가 시작할 때 6일차 RandomForest 모델과 설정 JSON을 불러오고 상태를 알려 줌<br><br>**확인 방법**<br>`GET /health`<br>`test_health_model_ready`<br><br>**기대 결과**<br>6개 Class, 1,140개 Feature 조건 일치<br><br>**결과** Pass | <a href="docs/images/t01_health.png"><img src="docs/images/tests/t01.png" width="560" alt="T01"></a> |
-| **T02 영상 업로드**<br><br>MP4를 올리면 작업이 등록되고 사람별 동작 결과가 화면에 표시됨<br><br>**확인 방법**<br>`S03_A006_T01.mp4` 업로드<br><br>**기대 결과**<br>작업 등록 → 결과 또는 명확한 실패 사유<br><br>**결과** Pass | <a href="docs/images/analysis.png"><img src="docs/images/tests/t02.png" width="560" alt="T02"></a> |
+| **T02 영상 업로드**<br><br>MP4를 올리면 작업이 등록되고 사람별 동작 결과가 화면에 표시됨<br><br>**확인 방법**<br>`S03_A002_T01.mp4` 업로드<br><br>**기대 결과**<br>작업 등록 → 결과 또는 명확한 실패 사유<br><br>**결과** Pass | <a href="docs/images/analysis.png"><img src="docs/images/tests/t02.png" width="560" alt="T02"></a> |
 | **T03 IP Webcam**<br><br>휴대폰 IP Webcam 영상을 미리 보며 몇 초 녹화해 분석 요청<br><br>**확인 방법**<br>휴대폰 IP Webcam으로 8초 녹화<br><br>**기대 결과**<br>짧은 영상 수집·분석 요청 성공<br><br>**결과**  |  |
 | **T04 사람별 결과**<br><br>한 영상에서 여러 사람을 Track ID로 나눠 사람마다 결과를 저장<br><br>**확인 방법**<br>`S02_A001` 영상(뒤에 사람 1명 더)<br><br>**기대 결과**<br>한 작업에 Track ID별 결과 분리 (#13: 2건)<br><br>**결과** Pass | <a href="docs/images/admin_predictions.png"><img src="docs/images/tests/t04.png" width="560" alt="T04"></a> |
 | **T05 비동기 처리**<br><br>분석은 Celery Worker가 맡고 웹 서버는 기다리지 않고 바로 응답<br><br>**확인 방법**<br>`test_create_returns_job_id_immediately`<br>요청 직후 화면<br><br>**기대 결과**<br>202와 작업 ID 즉시 반환, 상태 "처리 중"<br><br>**결과** Pass | <a href="docs/images/t05_async.png"><img src="docs/images/tests/t05.png" width="560" alt="T05"></a> |

@@ -13,10 +13,10 @@ class PersonPredictionInline(admin.TabularInline):
 
 @admin.register(AnalysisJob)
 class AnalysisJobAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "input_type", "status", "expected_action", "prediction_summary", "processing_ms", "created_at")
+    list_display = ("id", "user", "user_no", "input_type", "status", "expected_action", "prediction_summary", "processing_ms", "created_at")
     list_filter = ("status", "input_type", "expected_action", "created_at")
     search_fields = ("user__username", "title", "memo", "celery_task_id")
-    readonly_fields = ("celery_task_id", "started_at", "completed_at", "created_at", "processing_ms", "video_duration_sec")
+    readonly_fields = ("user_no", "celery_task_id", "started_at", "completed_at", "created_at", "processing_ms", "video_duration_sec")
     inlines = [PersonPredictionInline]
     date_hierarchy = "created_at"
 

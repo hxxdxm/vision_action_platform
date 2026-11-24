@@ -53,6 +53,18 @@ class AnalysisApiTests(TestCase):
         defaults.update(kwargs)
         return AnalysisJob.objects.create(user=user, **defaults)
 
+    # 화면 번호: 사용자마다 1, 2, 3… (전체 공통 id와 별개)
+    def test_user_no_counts_per_user(self):
+        a1 = self.create_job(self.a)
+        b1 = self.create_job(self.b)
+        a2 = self.create_job(self.a)
+        self.assertEqual((a1.user_no, a2.user_no, b1.user_no), (1, 2, 1))
+        self.assertLess(a1.pk, b1.pk)
+        self.assertLess(b1.pk, a2.pk)  # id는 전체 공통이라 a의 두 번째 작업은 id 3
+        self.client.force_login(self.a)
+        r = self.client.get(f"/api/analyses/{a2.pk}/status/")
+        self.assertEqual(r.json()["user_no"], 2)
+
     # T05: 요청 직후 작업 ID 반환, 커밋 후 Celery 등록
     @mock.patch("analyses.views.run_analysis.delay")
     def test_create_returns_job_id_immediately(self, delay):

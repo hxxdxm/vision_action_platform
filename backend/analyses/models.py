@@ -4,6 +4,7 @@
 """
 from django.conf import settings
 from django.db import models
+from django.db.models import Max
 
 ACTION_CHOICES = [
     ("bend_return", "허리 굽혔다 펴기"),
@@ -28,6 +29,8 @@ class AnalysisJob(models.Model):
         FAILURE = "FAILURE", "실패"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="analysis_jobs")
+    # 사용자별 순번(1, 2, 3…). 화면에 보여 주는 번호. id(PK)는 전체 사용자 공통이라 주소·API·Admin에서 그대로 씁니다.
+    user_no = models.PositiveIntegerField("사용자별 번호", null=True, blank=True, editable=False)
     title = models.CharField("제목", max_length=100, blank=True)
     memo = models.TextField("메모", blank=True)
     input_type = models.CharField("입력 방식", max_length=20, choices=InputType.choices)
@@ -58,6 +61,13 @@ class AnalysisJob(models.Model):
 
     def __str__(self):
         return f"#{self.pk} {self.get_input_type_display()} {self.status}"
+
+    def save(self, *args, **kwargs):
+        # 새 작업이면 그 사용자의 마지막 번호 + 1 (DRF·Admin·테스트 등 어디서 만들어도 같은 규칙)
+        if self._state.adding and self.user_no is None and self.user_id:
+            last = AnalysisJob.objects.filter(user_id=self.user_id).aggregate(m=Max("user_no"))["m"] or 0
+            self.user_no = last + 1
+        super().save(*args, **kwargs)
 
     @property
     def is_finished(self):
