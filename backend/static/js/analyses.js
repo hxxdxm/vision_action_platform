@@ -152,7 +152,11 @@
         labels: timeline.map((w) => `${w.start_sec.toFixed(1)}~${w.end_sec.toFixed(1)}초`),
         datasets: [
           ...order.map((key) => {
-            const color = lineColors()[ACTION_KEYS.indexOf(key)];
+            // 1등 동작 선은 항상 포인트 색(--primary). 원래 그 색을 쓰던 동작과 색을 맞바꿔 겹치지 않게 함
+            const palette = lineColors();
+            const topIdx = ACTION_KEYS.indexOf(top);
+            [palette[0], palette[topIdx]] = [palette[topIdx], palette[0]];
+            const color = palette[ACTION_KEYS.indexOf(key)];
             const main = key === top;
             return { label: LABELS[key], data: timeline.map((w) => +((w.probabilities[key] || 0) * 100).toFixed(1)),
               borderColor: color, backgroundColor: main ? color + "22" : color, fill: main, tension: 0.3,

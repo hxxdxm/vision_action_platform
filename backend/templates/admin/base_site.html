@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{# Django Admin(로그인 포함) 전체에 서비스와 같은 보라 테마를 입힙니다. 원본: django/contrib/admin/templates/admin/base_site.html #}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Vision Action 관리자{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="icon" href="{% static 'favicon.svg' %}">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}"><span class="va-logo">◉</span> Vision Action 관리자</a></div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

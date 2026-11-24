@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Vision Action{% endblock %} · 동작 인식</title>
   <link rel="icon" href="{% static 'favicon.svg' %}">
-  <!-- 화면을 그리기 전에 저장된 테마를 적용해 깜빡임을 막습니다 (저장된 값이 없으면 다크) -->
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")==="light"?"light":"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
+  <!-- 화면을 그리기 전에 저장된 테마를 적용해 깜빡임을 막습니다. 저장값이 없으면 다크,
+       Django Admin에서 고른 "auto"(시스템 설정 따름)도 같은 저장값을 쓰므로 함께 처리합니다 -->
+  <script>(function(){var t="dark";try{var s=localStorage.getItem("theme");if(s==="light"||s==="dark")t=s;else if(s==="auto")t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}catch(e){}document.documentElement.dataset.theme=t})()</script>
   <!-- 인터넷이 없으면 글꼴만 시스템 글꼴로 바뀌고 화면은 그대로 동작합니다 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">

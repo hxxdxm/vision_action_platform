@@ -15,7 +15,7 @@
     charts.splice(0).forEach((c) => c.destroy());
     const css = getComputedStyle(document.documentElement);
     const v = (name, fallback) => css.getPropertyValue(name).trim() || fallback;
-    const C = { primary: v("--primary", "#8b5cf6"), primary2: v("--primary2", "#c4b5fd"), muted: v("--muted", "#9a9fbd"),
+    const C = { primary: v("--primary", "#22c55e"), primary2: v("--primary2", "#86efac"), muted: v("--muted", "#9a9fbd"),
       line: v("--line2", "#272b45"), ok: v("--ok", "#34d399"), warn: v("--warn", "#fbbf24"), bad: v("--bad", "#fb7185"),
       text: v("--text", "#e8e9f3"), card: v("--card", "#181c2e") };
     Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;

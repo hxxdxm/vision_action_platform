@@ -1,0 +1,97 @@
+/* Django Admin을 서비스(app.css)와 같은 그린 테마로 맞춤.
+   Admin은 CSS 변수로 색을 정하므로 변수만 덮어씁니다. 테마 저장값(localStorage "theme")도 서비스 화면과 공유합니다.
+   선택자 순서: 기본(라이트) → 시스템 다크(auto) → 직접 고른 라이트/다크 */
+:root, html[data-theme="light"] {
+  --primary: #15803d; --secondary: #166534; --accent: #16a34a; --primary-fg: #ffffff;
+  --body-fg: #16211a; --body-bg: #ffffff; --body-quiet-color: #586a5f; --body-medium-color: #34443a; --body-loud-color: #0c140f;
+  --header-color: #586a5f; --header-branding-color: #16211a; --header-bg: #ffffff; --header-link-color: #16211a;
+  --breadcrumbs-fg: #586a5f; --breadcrumbs-link-fg: #15803d; --breadcrumbs-bg: #eff6f1;
+  --link-fg: #15803d; --link-hover-color: #14532d; --link-selected-fg: #16a34a;
+  --hairline-color: #e5eee8; --border-color: #d2e0d6;
+  --darkened-bg: #f3f7f4; --selected-bg: #e3f4e9; --selected-row: #effaf3;
+  --button-fg: #ffffff; --button-bg: #15803d; --button-hover-bg: #166534;
+  --default-button-bg: #166534; --default-button-hover-bg: #14532d;
+  --close-button-bg: #85968b; --close-button-hover-bg: #586a5f;
+  --va-btn-grad: linear-gradient(90deg, #14532d, #15803d);
+  --va-shadow: 0 1px 2px rgba(22,33,26,.05), 0 6px 18px rgba(22,33,26,.06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #16a34a; --secondary: #15803d; --accent: #86efac; --primary-fg: #ffffff;
+    --body-fg: #ecf3ee; --body-bg: #18221c; --body-quiet-color: #a2b4a9; --body-medium-color: #d3e0d8; --body-loud-color: #ffffff;
+    --header-color: #a2b4a9; --header-branding-color: #ecf3ee; --header-bg: #141d18; --header-link-color: #ecf3ee;
+    --breadcrumbs-fg: #a2b4a9; --breadcrumbs-link-fg: #86efac; --breadcrumbs-bg: #1d2922;
+    --link-fg: #86efac; --link-hover-color: #bbf7d0; --link-selected-fg: #4ade80;
+    --hairline-color: #28362e; --border-color: #36493d;
+    --darkened-bg: #111814; --selected-bg: #1f2d25; --selected-row: #1d3a29;
+    --button-fg: #ffffff; --button-bg: #15803d; --button-hover-bg: #16a34a;
+    --default-button-bg: #16a34a; --default-button-hover-bg: #15803d;
+    --close-button-bg: #36493d; --close-button-hover-bg: #4b6253;
+    --va-btn-grad: linear-gradient(90deg, #166534, #16a34a);
+    --va-shadow: 0 0 0 1px rgba(34,197,94,.06), 0 8px 24px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+  html[data-theme="light"] {
+    --primary: #15803d; --secondary: #166534; --accent: #16a34a; --primary-fg: #ffffff;
+    --body-fg: #16211a; --body-bg: #ffffff; --body-quiet-color: #586a5f; --body-medium-color: #34443a; --body-loud-color: #0c140f;
+    --header-color: #586a5f; --header-branding-color: #16211a; --header-bg: #ffffff; --header-link-color: #16211a;
+    --breadcrumbs-fg: #586a5f; --breadcrumbs-link-fg: #15803d; --breadcrumbs-bg: #eff6f1;
+    --link-fg: #15803d; --link-hover-color: #14532d; --link-selected-fg: #16a34a;
+    --hairline-color: #e5eee8; --border-color: #d2e0d6;
+    --darkened-bg: #f3f7f4; --selected-bg: #e3f4e9; --selected-row: #effaf3;
+    --button-fg: #ffffff; --button-bg: #15803d; --button-hover-bg: #166534;
+    --default-button-bg: #166534; --default-button-hover-bg: #14532d;
+    --close-button-bg: #85968b; --close-button-hover-bg: #586a5f;
+    --va-btn-grad: linear-gradient(90deg, #14532d, #15803d);
+    --va-shadow: 0 1px 2px rgba(22,33,26,.05), 0 6px 18px rgba(22,33,26,.06);
+    color-scheme: light;
+  }
+}
+html[data-theme="dark"] {
+  --primary: #16a34a; --secondary: #15803d; --accent: #86efac; --primary-fg: #ffffff;
+  --body-fg: #ecf3ee; --body-bg: #18221c; --body-quiet-color: #a2b4a9; --body-medium-color: #d3e0d8; --body-loud-color: #ffffff;
+  --header-color: #a2b4a9; --header-branding-color: #ecf3ee; --header-bg: #141d18; --header-link-color: #ecf3ee;
+  --breadcrumbs-fg: #a2b4a9; --breadcrumbs-link-fg: #86efac; --breadcrumbs-bg: #1d2922;
+  --link-fg: #86efac; --link-hover-color: #bbf7d0; --link-selected-fg: #4ade80;
+  --hairline-color: #28362e; --border-color: #36493d;
+  --darkened-bg: #111814; --selected-bg: #1f2d25; --selected-row: #1d3a29;
+  --button-fg: #ffffff; --button-bg: #15803d; --button-hover-bg: #16a34a;
+  --default-button-bg: #16a34a; --default-button-hover-bg: #15803d;
+  --close-button-bg: #36493d; --close-button-hover-bg: #4b6253;
+  --va-btn-grad: linear-gradient(90deg, #166534, #16a34a);
+  --va-shadow: 0 0 0 1px rgba(34,197,94,.06), 0 8px 24px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+
+/* 공통: 글꼴·상단 바 */
+body, input, select, textarea, button {
+  font-family: "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+#header { border-bottom: 1.5px solid var(--border-color); }
+#site-name a { font-weight: 800; letter-spacing: -.01em; }
+.va-logo { color: var(--primary); }
+#user-tools a, #logout-form button { border-bottom-color: transparent; }
+#user-tools a:hover, #logout-form button:hover { color: var(--link-fg); text-decoration: none; }
+.module h2, .module caption, .inline-group h2 { background: var(--primary); }
+.module h2, .module caption, .module caption a, .module h2 a, .inline-group h2,
+#nav-sidebar .current-app .section:link, #nav-sidebar .current-app .section:visited { color: #fff; }
+input[type=submit], .button, a.button { border-radius: 8px; }
+
+/* 로그인 화면: 서비스 로그인 카드와 같은 모양 */
+.login #container { border: 1.5px solid var(--border-color); border-radius: 14px; box-shadow: var(--va-shadow); width: 26em; margin: 80px auto; }
+.login #header { background: var(--body-bg); border-bottom: 1px solid var(--hairline-color); padding: 22px 24px 18px; }
+.login #header h1, .login #site-name { font-size: 1.15rem; }
+.login #header h1 a, .login #site-name a { color: var(--body-fg); }
+.login #content { padding: 20px 24px 26px; }
+.login .form-row label { color: var(--body-quiet-color); font-size: .88rem; }
+.login .form-row #id_username, .login .form-row #id_password {
+  padding: .6rem .75rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--body-bg); color: var(--body-fg);
+}
+.login .form-row #id_username:focus, .login .form-row #id_password:focus { outline: none; border-color: var(--primary); }
+.login .submit-row input[type=submit] {
+  width: 100%; padding: .75rem 1rem; border: 0; border-radius: 10px; font-weight: 800; font-size: .95rem; cursor: pointer;
+  background: var(--va-btn-grad); color: #fff;
+}
+.login .submit-row input[type=submit]:hover { filter: brightness(1.08); }
+.login .errornote { border-radius: 8px; }
