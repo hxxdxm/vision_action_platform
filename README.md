@@ -25,7 +25,7 @@ Vision Action Platform은 영상 속 사람의 동작을 AI로 인식하는 웹 
 #### 1️⃣ 저장소 받기 · `.env` 만들기
 
 ```bash
-git clone https://github.com/simpson92/vision_action_platform.git
+git clone https://github.com/hxxdxm/vision_action_platform.git
 cd vision_action_platform
 cp .env.example .env
 ```
