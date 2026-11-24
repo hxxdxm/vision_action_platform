@@ -25,21 +25,25 @@
   const isDecided = (label) => label !== "UNCERTAIN" && label !== "INSUFFICIENT_INPUT";
   const pct = (v, digits = 1) => `${(v * 100).toFixed(digits)}%`;
 
-  // ---- 색: CSS 변수에서 읽어 Chart.js와 맞춤 ----
-  const css = getComputedStyle(document.documentElement);
-  const C = Object.fromEntries(["--primary", "--primary2", "--muted", "--line2", "--ok", "--warn", "--bad", "--text", "--card"]
-    .map((n) => [n.slice(2), css.getPropertyValue(n).trim()]));
+  // ---- 색: CSS 변수에서 읽어 Chart.js와 맞춤 (라이트/다크 전환 시 다시 읽음) ----
+  const COLOR_VARS = ["--primary", "--primary2", "--muted", "--line2", "--ok", "--warn", "--bad", "--text", "--card", "--series3", "--series6"];
+  const C = {};
   const hasChart = typeof Chart !== "undefined";
-  if (hasChart) {
-    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
-    Chart.defaults.color = C.muted;
-    Chart.defaults.borderColor = C.line2;
+  function readColors() {
+    const css = getComputedStyle(document.documentElement);
+    COLOR_VARS.forEach((n) => { C[n.slice(2)] = css.getPropertyValue(n).trim(); });
+    if (hasChart) {
+      Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+      Chart.defaults.color = C.muted;
+      Chart.defaults.borderColor = C.line2;
+    }
   }
+  readColors();
+  const lineColors = () => [C.primary, C.primary2, C.series3, C.warn, C.ok, C.series6];
 
   // ---- 지금 보고 있는 영상 한 건: 상단 지표 4개 + 그래프 2개 ----
   // 데이터는 그 작업의 status API 응답(사람별 details: 구간별 확률, 일치율, 관절 인식)에서 바로 가져옵니다.
   const ACTION_KEYS = Object.keys(EXPECTED);
-  const LINE_COLORS = [C.primary, C.primary2, "#60a5fa", C.warn, C.ok, "#22d3ee"];
   const charts = {};
   let focusJob = null;
   let focusTrack = null;
@@ -148,7 +152,7 @@
         labels: timeline.map((w) => `${w.start_sec.toFixed(1)}~${w.end_sec.toFixed(1)}초`),
         datasets: [
           ...order.map((key) => {
-            const color = LINE_COLORS[ACTION_KEYS.indexOf(key)];
+            const color = lineColors()[ACTION_KEYS.indexOf(key)];
             const main = key === top;
             return { label: LABELS[key], data: timeline.map((w) => +((w.probabilities[key] || 0) * 100).toFixed(1)),
               borderColor: color, backgroundColor: main ? color + "22" : color, fill: main, tension: 0.3,
@@ -179,7 +183,7 @@
       type: "bar",
       data: { labels: keys.map((k) => LABELS[k]), datasets: [
         { label: "전체 구간(학습과 같은 방식)", data: row(d.whole_probabilities), backgroundColor: C.primary2, borderRadius: 3 },
-        { label: "2초 구간 평균", data: row(d.window_mean_probabilities), backgroundColor: "#60a5fa", borderRadius: 3 },
+        { label: "2초 구간 평균", data: row(d.window_mean_probabilities), backgroundColor: C.series3, borderRadius: 3 },
         { label: "최종", data: row(person.probabilities), backgroundColor: C.primary, borderRadius: 3 },
       ] },
       options: { indexAxis: "y", maintainAspectRatio: false, animation: false,
@@ -188,6 +192,12 @@
         scales: { x: { min: 0, suggestedMax: 40, ticks: { callback: (v) => `${v}%` } }, y: { grid: { display: false }, ticks: { color: C.text } } } },
     });
   }
+
+  // 라이트/다크 전환: 색을 다시 읽고 지금 보고 있는 결과(지표 링·그래프 2개)를 다시 그림
+  document.addEventListener("themechange", () => {
+    readColors();
+    if (focusJob) showFocus(focusJob, focusTrack);
+  });
 
   // 이력 행을 누르면 그 작업을 위 결과 카드·지표·그래프에 표시
   async function loadJob(id) {
